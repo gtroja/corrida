@@ -36,36 +36,42 @@ class Corrida {
 
         let pullMaker = (regex) => {
             return (text)=>{
-                console.log("recebi ",text);
                 let matched = text.match(regex);
                 if(matched){
-                    console.log("achei", matched[0]);
                     return [matched[0], text.replace(matched[0],'')];
                 }
-                console.log("não achei")
                 return [];
             }
         }
 
         let pullTimestamp = pullMaker(/([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]\.[0-9]{3}/); //matches timestamp
-        let pullPilot = pullMaker(/[0-9]* . [A-Z ,.'-]+/i); //matches pilot
+        let pullPilot = pullMaker(/[0-9]{1,3} . [A-Z][A-Z ,.'-]+/i); //matches pilot
+        let pullLapNumber = pullMaker(/[1-4]/);//matches lap number
+        let pullLapTime = pullMaker(/([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]\.[0-9]{3}/);// matches lap time
+        let pullAvgSpeed = pullMaker(/[0-9]{1,},[0-9]{1,3}/);// matches avg speed
 
+        let laps = [];
         let lines = textInput.split(/\r\n|\r|\n/); //splitting the lines
-        lines.forEach(line => {
-
+        lines.forEach((line, index) => {
+            let original = `${line}`;
             let timestamp, pilot, lapNumber, lapTime, avgSpeed;
 
             [timestamp, line] = pullTimestamp(line);
-            if( !timestamp )return;
+            if( !timestamp ){ console.warn(`erro na linha ${index} ao tentar ler timestamp\n line:\n ${original}`);return;}
 
             [pilot, line] = pullPilot(line);
-            if( !pilot )return;
+            if( !pilot ){ console.warn(`erro na linha ${index} ao tentar ler pilot\n line:\n ${original}`);return;}
 
+            [lapNumber, line] = pullLapNumber(line);
+            if( !lapNumber ){ console.warn(`erro na linha ${index} ao tentar ler lapNumber\n line:\n ${original}`);return;}
+            
+            [lapTime, line] = pullLapTime(line);
+            if( !lapTime ){ console.warn(`erro na linha ${index} ao tentar ler lapTime\n line:\n ${original}`);return;}
 
-            if( !pilot )return;
-            console.log(pilot)
-
-
+            [avgSpeed, line] = pullAvgSpeed(line);
+            if( !avgSpeed ){ console.warn(`erro na linha ${index} ao tentar ler avgSpeed\n line:\n ${original}`);return;}
+            
+            laps.push([timestamp, pilot.trim(), lapNumber, lapTime, avgSpeed])            
             
         });
         return [];
@@ -79,4 +85,8 @@ class Corrida {
         return "i work :)";
     }
 
+}
+
+if(typeof module !== 'undefined'){//for using in nodejs
+    module.exports = Corrida;
 }
