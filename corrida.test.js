@@ -32,6 +32,13 @@ const mockTextInput = `Hora                               Piloto             Nº
 23:53:39.660      011 – S.VETTEL                          2		1:37.864			28,435
 23:54:57.757      011 – S.VETTEL                          3		1:18.097			35,633
 `
+const expectedResult= `1;038;F.MASSA;4;4:11.578;
+2;033;R.BARRICHELLO;3;3:12.070;
+3;002;K.RAIKKONEN;3;3:12.077;
+4;023;M.WEBBER;3;3:13.506;
+5;015;F.ALONSO;3;3:34.171;
+6;011;S.VETTEL;1;3:31.315;`;
+
 var corrida = new Corrida(mockTextInput);
 
 var testes = [
@@ -41,6 +48,23 @@ var testes = [
     {   description: "importou 6 pilotos",
         passed: corrida.pilots.length == 6},
 
+    {   description: "o ranking tem 6 pilotos",
+        passed: corrida.ranking.length == 6},
+    
+    {   description: "o primeiro lugar completou 4 voltas",
+        passed: corrida.ranking[0][3] == 4},
+
+    {   description: "o segundo lugar não completou 4 voltas",
+        passed: corrida.ranking[1][3] != 4},
+
+    {   description: "o tempo do primeiro lugar foi 4:11.578",
+        passed: corrida.ranking[0][4] === '4:11.578'},
+    
+    {   description: "o tempo do segundo lugar é menor que do terceiro lugar",
+        passed: corrida.ranking[1][4] < corrida.ranking[2][4]},
+
+    {   description: "a saida dada é igual a esperada",
+        passed: expectedResult.trim() === corrida.getResultText().trim()}
 ]
 
 testes.forEach(test => {
@@ -55,5 +79,5 @@ testes.forEach(test => {
 console.log(`
 ${testes.length} testes realizados:
 ${testes.filter(t=>t['passed']).length} passaram
-${testes.filter(t=>!t['passed']).length} passaram
+${testes.filter(t=>!t['passed']).length} falharam
 `);
