@@ -1,0 +1,84 @@
+<style>
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+</style>
+<div> 
+    <h3>input text</h3>
+    <pre id="input-placeholder"></pre>
+</div>
+
+<input type="file" id="file-selector" accept=".txt">
+
+<div> 
+    <h3>output text</h3>
+    <div id="output-placeholder"></div>
+    <a id="download-button" download="resultado.txt" style="display: none;"> Download </a>
+</div>
+
+<script src="./corrida.js"></script>
+<script>
+
+  const fileSelector = document.getElementById('file-selector');
+  const reader = new FileReader();
+  var corrida = new Corrida();
+
+  var textInput = "";
+  var textOutput = "";
+  var tableOutput = "";
+
+  fileSelector.addEventListener('change', (event) => {
+        let file = event.target.files[0];
+        reader.readAsText(file);
+  });
+  
+  reader.addEventListener('load', (event) => {
+    textInput = event.target.result
+    process(textInput);
+    changeText();
+  });
+
+  function changeText() {
+    document.getElementById('input-placeholder').innerHTML = textInput;
+    document.getElementById('output-placeholder').innerHTML = `${tableOutput} <hr/> <pre>${textOutput}</pre>`;
+  }
+
+  function process(textInput) {
+    
+    tableOutput = montaTabela(corrida.getResult(textInput));
+    textOutput = corrida.getResultText();
+
+    let botao = document.getElementById('download-button');
+    if(textOutput === ''){
+        botao.setAttribute('style', "display : none;");
+    }
+    else{
+        botao.setAttribute('style', "display : block;");
+        botao.setAttribute('hr', "display : block;");
+        botao.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(textOutput));
+    }
+
+  }
+
+  function montaTabela(tab){
+    let header =   `<tr>
+      <th>Posição</th>
+      <th>Cod Piloto</th>
+      <th>Nome piloto</th>
+      <th>Voltas Completadas</th>
+      <th>Tempo Total</th>
+    </tr>`
+    let ranking = ""
+    tab.forEach((line)=>{
+      ranking += "<tr>"
+        line.forEach((d) =>{
+          ranking += `<td>${d}</td>`
+        });
+      ranking += "</tr>"
+    });
+    return `<table>${header}${ranking}</table>`
+
+  }
+
+</script>
